@@ -54,7 +54,7 @@ PORT=5000
 ### 4️⃣ Criar Banco de Dados e Tabelas
 
 ```sh
-npm run setup-db
+node src/createTableAuth.js
 ```
 
 ### 5️⃣ Iniciar o Servidor
