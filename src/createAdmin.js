@@ -4,27 +4,33 @@ const bcrypt = require('bcryptjs');
 async function createAdminUser() {
     const name = 'Admin';
     const email = 'admin@example.com';
-    const password = 'admin123'; // Senha padrão (será criptografada)
+    const password = 'admin123';
 
     try {
-        // Verifica se o usuário já existe
+        // Inserir os tipos de usuário se não existirem
+        await db.execute('INSERT IGNORE INTO userType (id, name) VALUES (1, "Admin"), (2, "User")');
+
+        // Verifica se o usuário admin já existe
         const [existingUser] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
         if (existingUser.length > 0) {
             console.log('Usuário admin já existe!');
             process.exit();
         }
 
-        // Criptografa a senha
+        // Criptografar senha
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insere o usuário admin no banco de dados
-        await db.execute('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hashedPassword]);
+        // Criar usuário admin com user_type_id = 1
+        await db.execute(
+            'INSERT INTO users (name, email, password, user_type_id) VALUES (?, ?, ?, ?)',
+            [name, email, hashedPassword, 1]
+        );
 
         console.log('Usuário admin criado com sucesso!');
     } catch (error) {
         console.error('Erro ao criar usuário admin:', error);
     } finally {
-        process.exit(); // Finaliza o script após a execução
+        process.exit();
     }
 }
 
